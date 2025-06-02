@@ -3,7 +3,7 @@ import json
 import os
 from openai import OpenAI
 
-# ✅ Initialise OpenAI client (new SDK style)
+# Initialise OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 st.set_page_config(page_title="AI Code Window Generator", layout="wide")
@@ -11,7 +11,7 @@ st.title("🧠 AI Code Window Generator for Sportscode")
 
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
 
-# === Helper Functions ===
+# --- Helper Functions ---
 def get_colour_for_row(name):
     name = name.lower()
     if "goal" in name: return "#d7263d"
@@ -101,7 +101,7 @@ def render_pitch(rows):
     pitch_html += "</div>"
     st.markdown(pitch_html, unsafe_allow_html=True)
 
-# === Run on Button Press ===
+# --- Run the Generator ---
 if st.button("Generate"):
     if not prompt.strip():
         st.warning("Please enter a tactical scenario.")
@@ -111,22 +111,40 @@ if st.button("Generate"):
                 res = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
-                        {"role": "system", "content": "You are a Hudl Sportscode expert. Generate a JSON layout for a code window with row names, labels, and colour hints based on tactical prompts."},
+                        {"role": "system", "content": """
+You are a Hudl Sportscode expert. Always respond with a valid JSON object in this format:
+{
+  "rows": [
+    {
+      "name": "High Press Trigger",
+      "labels": ["Left Zone", "Pass Forced", "Interception"],
+      "colour": "Red"
+    },
+    {
+      "name": "Cutback Opportunity",
+      "labels": ["Zone 14", "Player", "Assist Type"],
+      "colour": "Yellow"
+    }
+  ]
+}
+""" },
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.7,
                     max_tokens=700
                 )
-raw = res.choices[0].message.content.strip()
 
-# Try parsing, with fallback for debugging
-try:
-    parsed = json.loads(raw)
-except json.JSONDecodeError:
-    st.error("⚠️ GPT-4 did not return valid JSON.")
-    st.markdown("### Raw AI Output:")
-    st.code(raw)
-    st.stop()
+                raw = res.choices[0].message.content.strip()
+
+                # Try parsing the response as JSON
+                try:
+                    parsed = json.loads(raw)
+                except json.JSONDecodeError:
+                    st.error("⚠️ GPT-4 did not return valid JSON.")
+                    st.markdown("### Raw AI Output:")
+                    st.code(raw)
+                    st.stop()
+
                 rows = parsed.get("rows", [])
                 if not rows:
                     st.error("No rows found in the output.")
@@ -141,5 +159,6 @@ except json.JSONDecodeError:
                     render_pitch(rows)
                 with st.expander("🔍 Raw JSON"):
                     st.json(parsed)
+
             except Exception as e:
                 st.error(f"❌ Error: {e}")
