@@ -3,6 +3,24 @@ import openai
 import json
 import os
 
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Then later in your button logic:
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "You are a Hudl Sportscode expert..."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.7,
+    max_tokens=700
+)
+
+raw = response.choices[0].message.content
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 st.set_page_config(page_title="AI Code Window Generator", layout="wide")
 st.title("🧠 AI Code Window Generator for Sportscode")
