@@ -19,8 +19,8 @@ def extract_teams(text):
 
 # Function to generate team logo URLs (basic fallback using Wikipedia)
 def get_team_logo_url(team_name):
-    team_key = team_name.replace(" ", "_")
-    return f"https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/{team_key}_crest.svg/120px-{team_key}_crest.svg.png"
+    search_key = team_name.strip().replace(" ", "_").replace("FC", "").replace("SC", "")
+    return f"https://en.wikipedia.org/wiki/Special:Search?go=Go&search={search_key}+crest"
 
 # Extract team names and logo URLs
 team1, team2 = extract_teams(prompt)
