@@ -34,7 +34,9 @@ def categorise_row(name):
     else: return "Other"
 
 def render_code_window(rows):
-    st.markdown("<h3 style='margin-top:2rem;'>🎛️ Code Window Layout</h3>", unsafe_allow_html=True)
+    st.markdown("""
+        <h3 style='margin-top:2rem;'>🎛️ Code Window Layout</h3>
+    """, unsafe_allow_html=True)
 
     grouped = {}
     for row in rows:
@@ -42,33 +44,37 @@ def render_code_window(rows):
         grouped.setdefault(category, []).append(row)
 
     for category, items in grouped.items():
-        st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
+        st.markdown(f"""
+            <h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>
+        """, unsafe_allow_html=True)
 
         blocks = ""
         for row in items:
             name = row.get("name", "Unnamed")
             colour = get_colour_for_row(name)
             blocks += f"""
-            <div style=\"background-color:{colour};padding:12px;border-radius:6px;
-                        color:white;text-align:center;font-weight:bold;font-family:sans-serif;\">
-                {name}
-            </div>
+                <div style='background-color:{colour};padding:12px;border-radius:6px;
+                            color:white;text-align:center;font-weight:bold;font-family:sans-serif;'>
+                    {name}
+                </div>
             """
 
         full_html = f"""
-        <div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;\">
-            {blocks}
-        </div>
+            <div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>
+                {blocks}
+            </div>
         """
         st.markdown(full_html, unsafe_allow_html=True)
 
 def render_field_map(rows):
-    st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
+    st.markdown("""
+        <h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>
+    """, unsafe_allow_html=True)
 
     pitch_html = """
-    <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-                background-image:url("https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg");
-                background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
+        <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+                    background-image:url("https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg");
+                    background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
     """
 
     zones = {
@@ -93,12 +99,12 @@ def render_field_map(rows):
             x, y = zones["Centre Mid"]
 
         pitch_html += f"""
-        <div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);
-                    background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;
-                    font-size:0.8em;text-align:center;max-width:140px;'>
-            <strong>{name}</strong><br>
-            <span style='font-size:0.7em'>{label}</span>
-        </div>
+            <div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);
+                        background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;
+                        font-size:0.8em;text-align:center;max-width:140px;'>
+                <strong>{name}</strong><br>
+                <span style='font-size:0.7em'>{label}</span>
+            </div>
         """
 
     pitch_html += "</div>"
