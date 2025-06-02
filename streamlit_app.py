@@ -117,17 +117,16 @@ if st.button("Generate"):
                     temperature=0.7,
                     max_tokens=700
                 )
-               raw = res.choices[0].message.content.strip()
+raw = res.choices[0].message.content.strip()
 
-                # Try parsing, with fallback for debugging
-                try:
-                    parsed = json.loads(raw)
-                except json.JSONDecodeError:
-                    st.error("⚠️ GPT-4 did not return valid JSON.")
-                    st.markdown("### Raw AI Output:")
-                    st.code(raw)
-                    st.stop()
-
+# Try parsing, with fallback for debugging
+try:
+    parsed = json.loads(raw)
+except json.JSONDecodeError:
+    st.error("⚠️ GPT-4 did not return valid JSON.")
+    st.markdown("### Raw AI Output:")
+    st.code(raw)
+    st.stop()
                 rows = parsed.get("rows", [])
                 if not rows:
                     st.error("No rows found in the output.")
