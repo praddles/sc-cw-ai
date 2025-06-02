@@ -34,16 +34,16 @@ def categorise_row(name):
     else: return "Other"
 
 def render_code_window(rows):
-    st.markdown("""<style>div.block-container {padding-top: 2rem;}</style>""", unsafe_allow_html=True)
-    st.markdown("""<h3 style='margin-bottom:0.5rem;'>🎛️ Code Window Layout</h3>""", unsafe_allow_html=True)
-    
+    st.markdown("<style>div.block-container {padding-top: 2rem;}</style>", unsafe_allow_html=True)
+    st.markdown("<h3 style='margin-bottom:0.5rem;'>🎛️ Code Window Layout</h3>", unsafe_allow_html=True)
+
     grouped = {}
     for row in rows:
         category = categorise_row(row.get("name", "Other"))
         grouped.setdefault(category, []).append(row)
 
     for category, items in grouped.items():
-        st.markdown(f"""<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>""", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
         html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>"
         for row in items:
             name = row.get("name", "Unnamed")
@@ -55,6 +55,33 @@ def render_code_window(rows):
             """
         html += "</div>"
         st.markdown(html, unsafe_allow_html=True)
+
+def render_field_map(rows):
+    st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
+    pitch_html = """
+    <div style='position: relative; width: 100%; max-width: 800px; aspect-ratio: 2 / 1; background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg"); background-size: cover; border: 2px solid #aaa; margin-bottom: 20px;'>
+    """
+    zones = {
+        "Left Wing": (15, 40), "Right Wing": (75, 40),
+        "Centre Mid": (45, 50), "Final Third": (45, 20), "Defensive Third": (45, 80)
+    }
+    for row in rows:
+        name = row.get("name", "Unnamed")
+        label = ", ".join(row.get("labels", []))
+        lower = name.lower()
+        if "left" in lower: x, y = zones["Left Wing"]
+        elif "right" in lower: x, y = zones["Right Wing"]
+        elif "final" in lower: x, y = zones["Final Third"]
+        elif "defen" in lower: x, y = zones["Defensive Third"]
+        else: x, y = zones["Centre Mid"]
+        pitch_html += f"""
+        <div style='position: absolute; left: {x}%; top: {y}%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.75); color: white; padding: 6px 10px; border-radius: 6px; font-size: 0.8em; text-align: center; max-width: 140px;'>
+            <strong>{name}</strong><br>
+            <span style='font-size: 0.7em'>{label}</span>
+        </div>
+        """
+    pitch_html += "</div>"
+    st.markdown(pitch_html, unsafe_allow_html=True)
 
 # --- Run the Generator ---
 if st.button("Generate"):
@@ -90,6 +117,7 @@ You are a Hudl Sportscode expert. Always respond with a valid JSON object in thi
                 )
 
                 raw = res.choices[0].message.content.strip()
+
                 try:
                     parsed = json.loads(raw)
                 except json.JSONDecodeError:
@@ -101,6 +129,7 @@ You are a Hudl Sportscode expert. Always respond with a valid JSON object in thi
                     st.error("No rows found in the output.")
                 else:
                     render_code_window(rows)
+                    render_field_map(rows)
 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
