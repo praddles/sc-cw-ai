@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import os
 from openai import OpenAI
+import re
 
 # Initialise OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -10,6 +11,30 @@ st.set_page_config(page_title="Sportscode Code Window", layout="wide")
 st.title("🧠 AI Code Window Generator (Sportscode-style)")
 
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
+
+# Function to extract team names from the prompt
+def extract_teams(text):
+    match = re.search(r"([A-Z][a-z]+(?: [A-Z][a-z]+)?) vs ([A-Z][a-z]+(?: [A-Z][a-z]+)?)", text)
+    return match.groups() if match else ("Team A", "Team B")
+
+# Function to generate team logo URLs (basic fallback using Wikipedia)
+def get_team_logo_url(team_name):
+    team_key = team_name.replace(" ", "_")
+    return f"https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/{team_key}_crest.svg/120px-{team_key}_crest.svg.png"
+
+# Extract team names and logo URLs
+team1, team2 = extract_teams(prompt)
+logo1 = get_team_logo_url(team1)
+logo2 = get_team_logo_url(team2)
+
+# Add team logo row
+t1, t2, t3 = st.columns([1, 4, 1])
+with t1:
+    st.image(logo1, width=80)
+with t2:
+    st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
+with t3:
+    st.image(logo2, width=80)
 
 # --- Helper Functions ---
 def get_colour_for_row(name):
