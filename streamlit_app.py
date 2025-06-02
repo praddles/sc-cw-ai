@@ -1,33 +1,17 @@
 import streamlit as st
-import openai
 import json
 import os
-
 from openai import OpenAI
-import os
 
+# ✅ Initialise OpenAI client (new SDK style)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Then later in your button logic:
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[
-        {"role": "system", "content": "You are a Hudl Sportscode expert..."},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.7,
-    max_tokens=700
-)
-
-raw = response.choices[0].message.content
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
 st.set_page_config(page_title="AI Code Window Generator", layout="wide")
 st.title("🧠 AI Code Window Generator for Sportscode")
 
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
 
-# --- Utility Functions ---
+# === Helper Functions ===
 def get_colour_for_row(name):
     name = name.lower()
     if "goal" in name: return "#d7263d"
@@ -117,14 +101,14 @@ def render_pitch(rows):
     pitch_html += "</div>"
     st.markdown(pitch_html, unsafe_allow_html=True)
 
-# --- Run the AI Call ---
+# === Run on Button Press ===
 if st.button("Generate"):
     if not prompt.strip():
         st.warning("Please enter a tactical scenario.")
     else:
         with st.spinner("Thinking..."):
             try:
-                res = openai.ChatCompletion.create(
+                res = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
                         {"role": "system", "content": "You are a Hudl Sportscode expert. Generate a JSON layout for a code window with row names, labels, and colour hints based on tactical prompts."},
@@ -133,13 +117,12 @@ if st.button("Generate"):
                     temperature=0.7,
                     max_tokens=700
                 )
-                raw = res.choices[0].message["content"]
+                raw = res.choices[0].message.content
                 parsed = json.loads(raw)
                 rows = parsed.get("rows", [])
                 if not rows:
                     st.error("No rows found in the output.")
                 else:
-                    # Group and render
                     cat_rows = {}
                     for r in rows:
                         cat = categorise_row(r["name"])
@@ -151,4 +134,4 @@ if st.button("Generate"):
                 with st.expander("🔍 Raw JSON"):
                     st.json(parsed)
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"❌ Error: {e}")
