@@ -83,44 +83,21 @@ def render_code_window(rows, pitch_type):
 
     grouped = {}
     for row in rows:
-        name = row.get("name", "Unnamed")
-        label = ", ".join(row.get("labels", []))
-        lower = name.lower()
+        category = categorise_row(row.get("name", "Other"))
+        grouped.setdefault(category, []).append(row)
 
-        if pitch_type == "Basketball":
-            if "left wing" in lower:
-                x, y = zones["Left Wing"]
-            elif "right wing" in lower:
-                x, y = zones["Right Wing"]
-            elif "key" in lower:
-                x, y = zones["Top of Key"]
-            elif "paint" in lower:
-                x, y = zones["Paint"]
-            elif "corner" in lower and "left" in lower:
-                x, y = zones["Corner Three Left"]
-            elif "corner" in lower and "right" in lower:
-                x, y = zones["Corner Three Right"]
-            else:
-                x, y = zones["Top of Key"]
-        else:
-            if "left" in lower:
-                x, y = zones["Left Wing"]
-            elif "right" in lower:
-                x, y = zones["Right Wing"]
-            elif "final" in lower:
-                x, y = zones["Final Third"]
-            elif "defen" in lower:
-                x, y = zones["Defensive Third"]
-            else:
-                x, y = zones["Centre Mid"]
+    for category, items in grouped.items():
+        st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
-        pitch_html += f"<div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);"
-        pitch_html += "background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;"
-        pitch_html += "font-size:0.8em;text-align:center;max-width:140px;'>"
-        pitch_html += f"<strong>{name}</strong><br><span style='font-size:0.7em'>{label}</span></div>"
+        html_blocks = []
+        for row in items:
+            name = row.get("name", "Unnamed")
+            colour = get_colour_for_row(name)
+            block_html = f"<div style='background-color:{colour};padding:12px;border-radius:6px;color:white;text-align:center;font-weight:bold;font-family:sans-serif;'>{name}</div>"
+            html_blocks.append(block_html)
 
-    pitch_html += "</div>"
-    st.markdown(pitch_html, unsafe_allow_html=True)
+        grid_html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>" + "".join(html_blocks) + "</div>"
+        st.markdown(grid_html, unsafe_allow_html=True)
 
 # --- Run the Generator ---
     # Extract and show team names and logos only after prompt is submitted
