@@ -96,14 +96,35 @@ def render_code_window(rows):
 def render_field_map(rows):
     st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
 
-    pitch_html = "<div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;"
-    pitch_html += "background-image:url(\"https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg\");"
-    pitch_html += "background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>"
+    pitch_type = st.selectbox("Select pitch type:", ["Soccer", "Basketball"], index=0)
+    pitch_image = {
+        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg",
+        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
+    }[pitch_type]
 
-    zones = {
-        "Left Wing": (15, 40), "Right Wing": (75, 40),
-        "Centre Mid": (45, 50), "Final Third": (45, 20), "Defensive Third": (45, 80)
-    }
+    pitch_html = f"""
+        <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+        background-image:url("{pitch_image}");
+        background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
+    """
+
+        if pitch_type == "Basketball":
+        zones = {
+            "Left Wing": (25, 50),
+            "Right Wing": (75, 50),
+            "Top of Key": (50, 30),
+            "Paint": (50, 60),
+            "Corner Three Left": (10, 85),
+            "Corner Three Right": (90, 85)
+        }
+    else:
+        zones = {
+            "Left Wing": (15, 40),
+            "Right Wing": (75, 40),
+            "Centre Mid": (45, 50),
+            "Final Third": (45, 20),
+            "Defensive Third": (45, 80)
+        }
 
     for row in rows:
         name = row.get("name", "Unnamed")
