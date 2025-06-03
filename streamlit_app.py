@@ -19,15 +19,27 @@ def extract_teams(text):
 
 # Function to generate team logo URLs (basic fallback using Wikipedia)
 def get_team_logo_url(team_name):
-    team_logos = {
-        "Team A": "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png",
-        "Team B": "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
+    import requests
+    session = requests.Session()
+    search_query = f"{team_name} crest"
+    url = "https://en.wikipedia.org/w/api.php"
+    params = {
+        "action": "query",
+        "format": "json",
+        "prop": "pageimages",
+        "piprop": "original",
+        "titles": search_query
     }
-    formatted_name = team_name.strip()
-    if formatted_name in team_logos:
-        return team_logos[formatted_name]
-    search_name = formatted_name.replace(" ", "_").replace("FC", "").replace("SC", "")
-    return f"https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/{search_name}_crest.svg/120px-{search_name}_crest.svg.png"
+    try:
+        response = session.get(url=url, params=params)
+        data = response.json()
+        pages = data.get("query", {}).get("pages", {})
+        for page in pages.values():
+            if "original" in page:
+                return page["original"]["source"]
+    except Exception:
+        pass
+    return "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
     search_key = team_name.strip().replace(" ", "_").replace("FC", "").replace("SC", "")
     return f"https://en.wikipedia.org/wiki/Special:Search?go=Go&search={search_key}+crest"
 
@@ -39,10 +51,11 @@ logo2 = get_team_logo_url(team2)
 # Add team logo row
 t1, t2, t3 = st.columns([1, 4, 1])
 with t1:
-    st.image(logo1, width=80)
+    st.image(logo1 if prompt else "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png", width=80)
 with t2:
     st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
 with t3:
+    st.image(logo2 if prompt else "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png", width=80)
     st.image(logo2, width=80)
 
 # --- Helper Functions ---
