@@ -12,6 +12,9 @@ st.title("🧠 AI Code Window Generator (Sportscode-style)")
 
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
 
+# Select pitch type before generating
+
+
 # Function to extract team names from the prompt
 def extract_teams(text):
     match = re.search(r"([A-Z][a-z]+(?: [A-Z][a-z]+)?) vs ([A-Z][a-z]+(?: [A-Z][a-z]+)?)", text)
@@ -77,70 +80,36 @@ def render_code_window(rows):
 
     grouped = {}
     for row in rows:
-        category = categorise_row(row.get("name", "Other"))
-        grouped.setdefault(category, []).append(row)
-
-    for category, items in grouped.items():
-        st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
-
-        html_blocks = []
-        for row in items:
-            name = row.get("name", "Unnamed")
-            colour = get_colour_for_row(name)
-            block_html = f"<div style='background-color:{colour};padding:12px;border-radius:6px;color:white;text-align:center;font-weight:bold;font-family:sans-serif;'>{name}</div>"
-            html_blocks.append(block_html)
-
-        grid_html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>" + "".join(html_blocks) + "</div>"
-        st.markdown(grid_html, unsafe_allow_html=True)
-
-def render_field_map(rows):
-    st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
-
-    pitch_type = st.selectbox("Select pitch type:", ["Soccer", "Basketball"], index=0)
-    pitch_image = {
-        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg",
-        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
-    }[pitch_type]
-
-    pitch_html = f"""
-    <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-    background-image:url("{pitch_image}");
-    background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
-"""
-
-    if pitch_type == "Basketball":
-        zones = {
-            "Left Wing": (25, 50),
-            "Right Wing": (75, 50),
-            "Top of Key": (50, 30),
-            "Paint": (50, 60),
-            "Corner Three Left": (10, 85),
-            "Corner Three Right": (90, 85)
-        }
-    else:
-        zones = {
-            "Left Wing": (15, 40),
-            "Right Wing": (75, 40),
-            "Centre Mid": (45, 50),
-            "Final Third": (45, 20),
-            "Defensive Third": (45, 80)
-        }
-
-    for row in rows:
         name = row.get("name", "Unnamed")
         label = ", ".join(row.get("labels", []))
         lower = name.lower()
 
-        if "left" in lower:
-            x, y = zones["Left Wing"]
-        elif "right" in lower:
-            x, y = zones["Right Wing"]
-        elif "final" in lower:
-            x, y = zones["Final Third"]
-        elif "defen" in lower:
-            x, y = zones["Defensive Third"]
+        if pitch_type == "Basketball":
+            if "left wing" in lower:
+                x, y = zones["Left Wing"]
+            elif "right wing" in lower:
+                x, y = zones["Right Wing"]
+            elif "key" in lower:
+                x, y = zones["Top of Key"]
+            elif "paint" in lower:
+                x, y = zones["Paint"]
+            elif "corner" in lower and "left" in lower:
+                x, y = zones["Corner Three Left"]
+            elif "corner" in lower and "right" in lower:
+                x, y = zones["Corner Three Right"]
+            else:
+                x, y = zones["Top of Key"]
         else:
-            x, y = zones["Centre Mid"]
+            if "left" in lower:
+                x, y = zones["Left Wing"]
+            elif "right" in lower:
+                x, y = zones["Right Wing"]
+            elif "final" in lower:
+                x, y = zones["Final Third"]
+            elif "defen" in lower:
+                x, y = zones["Defensive Third"]
+            else:
+                x, y = zones["Centre Mid"]
 
         pitch_html += f"<div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);"
         pitch_html += "background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;"
