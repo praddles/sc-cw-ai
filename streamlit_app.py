@@ -99,6 +99,78 @@ def render_code_window(rows, pitch_type):
         grid_html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>" + "".join(html_blocks) + "</div>"
         st.markdown(grid_html, unsafe_allow_html=True)
 
+def render_field_map(rows, pitch_type):
+    st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
+
+    pitch_image = {
+        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg",
+        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
+    }[pitch_type]
+
+    pitch_html = f"""
+        <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+        background-image:url("{pitch_image}");
+        background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
+    """
+
+    if pitch_type == "Basketball":
+        zones = {
+            "Left Wing": (25, 50),
+            "Right Wing": (75, 50),
+            "Top of Key": (50, 30),
+            "Paint": (50, 60),
+            "Corner Three Left": (10, 85),
+            "Corner Three Right": (90, 85)
+        }
+    else:
+        zones = {
+            "Left Wing": (15, 40),
+            "Right Wing": (75, 40),
+            "Centre Mid": (45, 50),
+            "Final Third": (45, 20),
+            "Defensive Third": (45, 80)
+        }
+
+    for row in rows:
+        name = row.get("name", "Unnamed")
+        label = ", ".join(row.get("labels", []))
+        lower = name.lower()
+
+        if pitch_type == "Basketball":
+            if "left wing" in lower:
+                x, y = zones["Left Wing"]
+            elif "right wing" in lower:
+                x, y = zones["Right Wing"]
+            elif "key" in lower:
+                x, y = zones["Top of Key"]
+            elif "paint" in lower:
+                x, y = zones["Paint"]
+            elif "corner" in lower and "left" in lower:
+                x, y = zones["Corner Three Left"]
+            elif "corner" in lower and "right" in lower:
+                x, y = zones["Corner Three Right"]
+            else:
+                x, y = zones["Top of Key"]
+        else:
+            if "left" in lower:
+                x, y = zones["Left Wing"]
+            elif "right" in lower:
+                x, y = zones["Right Wing"]
+            elif "final" in lower:
+                x, y = zones["Final Third"]
+            elif "defen" in lower:
+                x, y = zones["Defensive Third"]
+            else:
+                x, y = zones["Centre Mid"]
+
+        pitch_html += f"<div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);"
+        pitch_html += "background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;"
+        pitch_html += "font-size:0.8em;text-align:center;max-width:140px;'>"
+        pitch_html += f"<strong>{name}</strong><br><span style='font-size:0.7em'>{label}</span></div>"
+
+    pitch_html += "</div>"
+    st.markdown(pitch_html, unsafe_allow_html=True)
+
 # --- Run the Generator ---
     # Extract and show team names and logos only after prompt is submitted
     team1, team2 = extract_teams(prompt)
