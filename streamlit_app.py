@@ -48,15 +48,7 @@ team1, team2 = extract_teams(prompt) if prompt.strip() else ("Team A", "Team B")
 logo1 = get_team_logo_url(team1)
 logo2 = get_team_logo_url(team2)
 
-# Add team logo row
-t1, t2, t3 = st.columns([1, 4, 1])
-with t1:
-    st.image(logo1 if prompt else "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png", width=80)
-with t2:
-    st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
-with t3:
-    st.image(logo2 if prompt else "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png", width=80)
-    st.image(logo2, width=80)
+
 
 # --- Helper Functions ---
 def get_colour_for_row(name):
@@ -138,6 +130,18 @@ def render_field_map(rows):
     st.markdown(pitch_html, unsafe_allow_html=True)
 
 # --- Run the Generator ---
+    # Extract and show team names and logos only after prompt is submitted
+    team1, team2 = extract_teams(prompt)
+    logo1 = get_team_logo_url(team1)
+    logo2 = get_team_logo_url(team2)
+
+    t1, t2, t3 = st.columns([1, 4, 1])
+    with t1:
+        st.image(logo1, width=80)
+    with t2:
+        st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
+    with t3:
+        st.image(logo2, width=80)
 if st.button("Generate"):
     if not prompt.strip():
         st.warning("Please enter a tactical scenario.")
