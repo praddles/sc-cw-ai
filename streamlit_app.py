@@ -19,11 +19,20 @@ def extract_teams(text):
 
 # Function to generate team logo URLs (basic fallback using Wikipedia)
 def get_team_logo_url(team_name):
+    team_logos = {
+        "Team A": "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png",
+        "Team B": "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
+    }
+    formatted_name = team_name.strip()
+    if formatted_name in team_logos:
+        return team_logos[formatted_name]
+    search_name = formatted_name.replace(" ", "_").replace("FC", "").replace("SC", "")
+    return f"https://upload.wikimedia.org/wikipedia/en/thumb/4/4a/{search_name}_crest.svg/120px-{search_name}_crest.svg.png"
     search_key = team_name.strip().replace(" ", "_").replace("FC", "").replace("SC", "")
     return f"https://en.wikipedia.org/wiki/Special:Search?go=Go&search={search_key}+crest"
 
 # Extract team names and logo URLs
-team1, team2 = extract_teams(prompt)
+team1, team2 = extract_teams(prompt) if prompt.strip() else ("Team A", "Team B")
 logo1 = get_team_logo_url(team1)
 logo2 = get_team_logo_url(team2)
 
