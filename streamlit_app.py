@@ -103,12 +103,12 @@ def render_field_map(rows):
     }[pitch_type]
 
     pitch_html = f"""
-        <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-        background-image:url("{pitch_image}");
-        background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
-    """
+    <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+    background-image:url("{pitch_image}");
+    background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
+"""
 
-        if pitch_type == "Basketball":
+    if pitch_type == "Basketball":
         zones = {
             "Left Wing": (25, 50),
             "Right Wing": (75, 50),
