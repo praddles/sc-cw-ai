@@ -13,6 +13,9 @@ st.title("🧠 AI Code Window Generator (Sportscode-style)")
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
 
 # Select pitch type before generating
+pitch_type = st.selectbox("Select pitch type:", ["Soccer", "Basketball"], index=0)
+
+# Select pitch type before generating
 
 
 # Function to extract team names from the prompt
@@ -75,7 +78,7 @@ def categorise_row(name):
     elif "1v1" in name or "interception" in name: return "Player Actions"
     else: return "Other"
 
-def render_code_window(rows):
+def render_code_window(rows, pitch_type):
     st.markdown("<h3 style='margin-top:2rem;'>🎛️ Code Window Layout</h3>", unsafe_allow_html=True)
 
     grouped = {}
@@ -176,8 +179,8 @@ You are a Hudl Sportscode expert. Always respond with a valid JSON object in thi
                 if not rows:
                     st.error("No rows found in the output.")
                 else:
-                    render_code_window(rows)
-                    render_field_map(rows)
+                    render_code_window(rows, pitch_type)
+                    render_field_map(rows, pitch_type)
 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
