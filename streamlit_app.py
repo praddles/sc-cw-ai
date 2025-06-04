@@ -83,7 +83,9 @@ def render_code_window(rows, pitch_type):
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
         bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
-grid_html = f'''<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
+grid_html = f"""
+<script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
 <script>
   const tagPositions = {{}};
   function reportPosition(id, left, top) {{
@@ -116,7 +118,7 @@ grid_html = f'''<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
   }}
 </style>
 <div id='pitch-container' style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-background-image:url("{bg_url}");
+background-image:url('{bg_url}');"""
 
 
         for idx, row in enumerate(items):
