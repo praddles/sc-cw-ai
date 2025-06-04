@@ -81,7 +81,8 @@ def render_code_window(rows):
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
         grid_html = f"""
-        <script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
+        <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>
+<script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
         <script>
           const tagPositions = {{}};
           function reportPosition(id, left, top) {{
