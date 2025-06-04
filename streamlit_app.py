@@ -115,9 +115,8 @@ def render_code_window(rows, pitch_type):
   }}
 </style>
 <div id='pitch-container' style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-background-image:url("{'https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg' if pitch_type == 'Soccer' else 'https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg'}");
-background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>'''
-background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>'''
+background-image:url(""" + ("https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg") + """);
+
 
         for idx, row in enumerate(items):
             name = row.get("name", "Unnamed")
