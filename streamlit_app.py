@@ -82,8 +82,8 @@ def render_code_window(rows, pitch_type):
     for category, items in grouped.items():
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
+                bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
         bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
-bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
 grid_html = f"""
 <script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
 <script>
