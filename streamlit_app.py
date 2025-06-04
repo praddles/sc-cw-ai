@@ -107,11 +107,36 @@ def render_field_map(rows, pitch_type):
         "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
     }[pitch_type]
 
-    pitch_html = f"""
-        <div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-        background-image:url("{pitch_image}");
-        background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
-    """
+    st.markdown("""
+        <style>
+        .pitch-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 2/1;
+            margin-bottom: 20px;
+        }
+        .pitch-background {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .tag-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            text-align: center;
+            max-width: 140px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    html = f"<div class='pitch-container'>"
+    html += f"<img src='{pitch_image}' class='pitch-background'>"
 
     if pitch_type == "Basketball":
         zones = {
@@ -163,13 +188,12 @@ def render_field_map(rows, pitch_type):
             else:
                 x, y = zones["Centre Mid"]
 
-        pitch_html += f"<div style='position:absolute;left:{x}%;top:{y}%;transform:translate(-50%,-50%);"
-        pitch_html += "background:rgba(0,0,0,0.75);color:white;padding:6px 10px;border-radius:6px;"
-        pitch_html += "font-size:0.8em;text-align:center;max-width:140px;'>"
-        pitch_html += f"<strong>{name}</strong><br><span style='font-size:0.7em'>{label}</span></div>"
+        html += f"<div class='tag-marker' style='left:{x}%;top:{y}%'>"
+        html += f"<strong>{name}</strong><br><span style='font-size:0.7em'>{label}</span>"
+        html += "</div>"
 
-    pitch_html += "</div>"
-    st.markdown(pitch_html, unsafe_allow_html=True)
+    html += "</div>"
+    st.markdown(html, unsafe_allow_html=True)
 
 # --- Run the Generator ---
     # Extract and show team names and logos only after prompt is submitted
