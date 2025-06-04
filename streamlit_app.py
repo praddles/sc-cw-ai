@@ -127,7 +127,8 @@ def render_code_window(rows):
             grid_html += block_html
 
         grid_html += "</div>"
-        st.markdown(grid_html, unsafe_allow_html=True)
+        import streamlit.components.v1 as components
+        components.html(grid_html, height=600, scrolling=True)
 
 # --- Run the Generator ---
 if st.button("Generate"):
