@@ -103,7 +103,7 @@ def render_field_map(rows, pitch_type):
     st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
 
     pitch_image = {
-        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Football_pitch_pitch_pattern.svg",
+        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg",
         "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
     }[pitch_type]
 
