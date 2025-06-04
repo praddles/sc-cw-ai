@@ -1,8 +1,9 @@
 import streamlit as st
 import json
 import os
-from openai import OpenAI
 import re
+from openai import OpenAI
+import requests
 
 # Initialise OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -11,18 +12,14 @@ st.set_page_config(page_title="Sportscode Code Window", layout="wide")
 st.title("🧠 AI Code Window Generator (Sportscode-style)")
 
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
-
-# Select pitch type before generating
 pitch_type = st.selectbox("Select Sport:", ["Soccer", "Basketball"], index=0)
 
-# Function to extract team names from the prompt
+# --- Team extraction and logos ---
 def extract_teams(text):
     match = re.search(r"([A-Z][a-z]+(?: [A-Z][a-z]+)?) vs ([A-Z][a-z]+(?: [A-Z][a-z]+)?)", text)
     return match.groups() if match else ("Team A", "Team B")
 
-# Function to generate team logo URLs (basic fallback using Wikipedia)
 def get_team_logo_url(team_name):
-    import requests
     session = requests.Session()
     search_query = f"{team_name} crest"
     url = "https://en.wikipedia.org/w/api.php"
@@ -44,12 +41,11 @@ def get_team_logo_url(team_name):
         pass
     return "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
 
-# Extract team names and logo URLs
 team1, team2 = extract_teams(prompt) if prompt.strip() else ("Team A", "Team B")
 logo1 = get_team_logo_url(team1)
 logo2 = get_team_logo_url(team2)
 
-# --- Helper Functions ---
+# --- Colour and Category helpers ---
 def get_colour_for_row(name):
     name = name.lower()
     if "goal" in name: return "#d7263d"
@@ -71,7 +67,7 @@ def categorise_row(name):
     elif "1v1" in name or "interception" in name: return "Player Actions"
     else: return "Other"
 
-def render_code_window(rows, pitch_type):
+def render_code_window(rows):
     st.markdown("<h3 style='margin-top:2rem;'>🎛️ Code Window Layout</h3>", unsafe_allow_html=True)
 
     grouped = {}
@@ -79,47 +75,47 @@ def render_code_window(rows, pitch_type):
         category = categorise_row(row.get("name", "Other"))
         grouped.setdefault(category, []).append(row)
 
+    bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
+
     for category, items in grouped.items():
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
-                bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
-        bg_url = "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg" if pitch_type == "Soccer" else "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
-grid_html = f"""
-<script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
-<script>
-  const tagPositions = {{}};
-  function reportPosition(id, left, top) {{
-    tagPositions[id] = {{ left, top }};
-    console.log("Saved position:", tagPositions);
-  }}
-  $(function() {{
-    $(".draggable-tag").draggable({{ 
-      containment: "#pitch-container",
-      grid: [20, 20],
-      stop: function(event, ui) {{
-        const id = ui.helper.attr("id");
-        const left = ui.position.left;
-        const top = ui.position.top;
-        reportPosition(id, left, top);
-      }}
-    }});
-  }});
-</script>
-<style>
-  .draggable-tag {{
-    position: absolute;
-    cursor: move;
-    padding: 10px;
-    border-radius: 6px;
-    color: white;
-    text-align: center;
-    font-weight: bold;
-    font-family: sans-serif;
-  }}
-</style>
-<div id='pitch-container' style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
-background-image:url('{bg_url}');"""
-
+        grid_html = f"""
+        <script src='https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'></script>
+        <script>
+          const tagPositions = {{}};
+          function reportPosition(id, left, top) {{
+            tagPositions[id] = {{ left, top }};
+            console.log("Saved position:", tagPositions);
+          }}
+          $(function() {{
+            $(".draggable-tag").draggable({{
+              containment: "#pitch-container",
+              grid: [20, 20],
+              stop: function(event, ui) {{
+                const id = ui.helper.attr("id");
+                const left = ui.position.left;
+                const top = ui.position.top;
+                reportPosition(id, left, top);
+              }}
+            }});
+          }});
+        </script>
+        <style>
+          .draggable-tag {{
+            position: absolute;
+            cursor: move;
+            padding: 10px;
+            border-radius: 6px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-family: sans-serif;
+          }}
+        </style>
+        <div id='pitch-container' style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+        background-image:url("{bg_url}");background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>
+        """
 
         for idx, row in enumerate(items):
             name = row.get("name", "Unnamed")
@@ -143,31 +139,13 @@ if st.button("Generate"):
                 res = client.chat.completions.create(
                     model="gpt-4",
                     messages=[
-                        {"role": "system", "content": """
-You are a Hudl Sportscode expert. Always respond with a valid JSON object in this format:
-{
-  "rows": [
-    {
-      "name": "High Press Trigger",
-      "labels": ["Left Zone", "Pass Forced", "Interception"],
-      "colour": "Red"
-    },
-    {
-      "name": "Cutback Opportunity",
-      "labels": ["Zone 14", "Player", "Assist Type"],
-      "colour": "Yellow"
-    }
-  ]
-}
-""" },
+                        {"role": "system", "content": "You are a Hudl Sportscode expert. Always respond with a valid JSON object like this: { \"rows\": [ { \"name\": \"Press Trigger\", \"labels\": [\"Zone\"], \"colour\": \"Red\" } ] }"},
                         {"role": "user", "content": prompt}
                     ],
                     temperature=0.7,
                     max_tokens=700
                 )
-
                 raw = res.choices[0].message.content.strip()
-
                 try:
                     parsed = json.loads(raw)
                 except json.JSONDecodeError:
@@ -186,7 +164,6 @@ You are a Hudl Sportscode expert. Always respond with a valid JSON object in thi
                     with t3:
                         st.image(logo2, width=80)
 
-                    render_code_window(rows, pitch_type)
-
+                    render_code_window(rows)
             except Exception as e:
                 st.error(f"❌ Error: {e}")
