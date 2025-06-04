@@ -104,7 +104,7 @@ def render_field_map(rows, pitch_type):
 
     pitch_image = {
         "Soccer": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg",
-        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Basketball_Court_FIBA.svg"
+        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
     }[pitch_type]
 
     st.markdown("""
