@@ -13,10 +13,7 @@ st.title("🧠 AI Code Window Generator (Sportscode-style)")
 prompt = st.text_area("📝 Describe your tactical scenario:", height=100)
 
 # Select pitch type before generating
-pitch_type = st.selectbox("Select pitch type:", ["Soccer", "Basketball"], index=0)
-
-# Select pitch type before generating
-
+pitch_type = st.selectbox("Select Sport:", ["Soccer", "Basketball"], index=0)
 
 # Function to extract team names from the prompt
 def extract_teams(text):
@@ -46,15 +43,11 @@ def get_team_logo_url(team_name):
     except Exception:
         pass
     return "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
-    search_key = team_name.strip().replace(" ", "_").replace("FC", "").replace("SC", "")
-    return f"https://en.wikipedia.org/wiki/Special:Search?go=Go&search={search_key}+crest"
 
 # Extract team names and logo URLs
 team1, team2 = extract_teams(prompt) if prompt.strip() else ("Team A", "Team B")
 logo1 = get_team_logo_url(team1)
 logo2 = get_team_logo_url(team2)
-
-
 
 # --- Helper Functions ---
 def get_colour_for_row(name):
@@ -89,125 +82,28 @@ def render_code_window(rows, pitch_type):
     for category, items in grouped.items():
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
-        html_blocks = []
+        grid_html = "<div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;"
+        grid_html += "background-image:url(\"https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg\");"
+        grid_html += "background-size:cover;border:2px solid #aaa;margin-bottom:20px;display:grid;"
+        grid_html += "grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:12px;'>"
+
+        placed = []
         for row in items:
             name = row.get("name", "Unnamed")
             colour = get_colour_for_row(name)
-            block_html = f"<div style='background-color:{colour};padding:12px;border-radius:6px;color:white;text-align:center;font-weight:bold;font-family:sans-serif;'>{name}</div>"
-            html_blocks.append(block_html)
+            x_shift, y_shift = 0, 0
+            while (x_shift, y_shift) in placed:
+                y_shift += 1
+            placed.append((x_shift, y_shift))
+            block_html = f"<div style='background-color:{colour};padding:12px;border-radius:6px;color:white;"
+            block_html += "text-align:center;font-weight:bold;font-family:sans-serif;'>"
+            block_html += f"{name}</div>"
+            grid_html += block_html
 
-        grid_html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;'>" + "".join(html_blocks) + "</div>"
+        grid_html += "</div>"
         st.markdown(grid_html, unsafe_allow_html=True)
 
-def render_field_map(rows, pitch_type):
-    st.markdown("<h3 style='margin-top:3rem;'>📍 XY Tagging Zones</h3>", unsafe_allow_html=True)
-
-    pitch_image = {
-        "Soccer": "https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg",
-        "Basketball": "https://upload.wikimedia.org/wikipedia/commons/b/be/Basketball_court_fiba.svg"
-    }[pitch_type]
-
-    st.markdown("""
-        <style>
-        .pitch-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            aspect-ratio: 2/1;
-            margin-bottom: 20px;
-        }
-        .pitch-background {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .tag-marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.75);
-            color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8em;
-            text-align: center;
-            max-width: 140px;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    html = f"<div class='pitch-container'>"
-    html += f"<img src='{pitch_image}' class='pitch-background'>"
-
-    if pitch_type == "Basketball":
-        zones = {
-            "Left Wing": (25, 50),
-            "Right Wing": (75, 50),
-            "Top of Key": (50, 30),
-            "Paint": (50, 60),
-            "Corner Three Left": (10, 85),
-            "Corner Three Right": (90, 85)
-        }
-    else:
-        zones = {
-            "Left Wing": (15, 40),
-            "Right Wing": (75, 40),
-            "Centre Mid": (45, 50),
-            "Final Third": (45, 20),
-            "Defensive Third": (45, 80)
-        }
-
-    for row in rows:
-        name = row.get("name", "Unnamed")
-        label = ", ".join(row.get("labels", []))
-        lower = name.lower()
-
-        if pitch_type == "Basketball":
-            if "left wing" in lower:
-                x, y = zones["Left Wing"]
-            elif "right wing" in lower:
-                x, y = zones["Right Wing"]
-            elif "key" in lower:
-                x, y = zones["Top of Key"]
-            elif "paint" in lower:
-                x, y = zones["Paint"]
-            elif "corner" in lower and "left" in lower:
-                x, y = zones["Corner Three Left"]
-            elif "corner" in lower and "right" in lower:
-                x, y = zones["Corner Three Right"]
-            else:
-                x, y = zones["Top of Key"]
-        else:
-            if "left" in lower:
-                x, y = zones["Left Wing"]
-            elif "right" in lower:
-                x, y = zones["Right Wing"]
-            elif "final" in lower:
-                x, y = zones["Final Third"]
-            elif "defen" in lower:
-                x, y = zones["Defensive Third"]
-            else:
-                x, y = zones["Centre Mid"]
-
-        html += f"<div class='tag-marker' style='left:{x}%;top:{y}%'>"
-        html += f"<strong>{name}</strong><br><span style='font-size:0.7em'>{label}</span>"
-        html += "</div>"
-
-    html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
-
 # --- Run the Generator ---
-    # Extract and show team names and logos only after prompt is submitted
-    team1, team2 = extract_teams(prompt)
-    logo1 = get_team_logo_url(team1)
-    logo2 = get_team_logo_url(team2)
-
-    t1, t2, t3 = st.columns([1, 4, 1])
-    with t1:
-        st.image(logo1, width=80)
-    with t2:
-        st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
-    with t3:
-        st.image(logo2, width=80)
 if st.button("Generate"):
     if not prompt.strip():
         st.warning("Please enter a tactical scenario.")
@@ -252,8 +148,15 @@ You are a Hudl Sportscode expert. Always respond with a valid JSON object in thi
                 if not rows:
                     st.error("No rows found in the output.")
                 else:
+                    t1, t2, t3 = st.columns([1, 4, 1])
+                    with t1:
+                        st.image(logo1, width=80)
+                    with t2:
+                        st.markdown(f"<h2 style='text-align:center;'>{team1} vs {team2}</h2>", unsafe_allow_html=True)
+                    with t3:
+                        st.image(logo2, width=80)
+
                     render_code_window(rows, pitch_type)
-                    render_field_map(rows, pitch_type)
 
             except Exception as e:
                 st.error(f"❌ Error: {e}")
