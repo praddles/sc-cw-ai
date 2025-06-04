@@ -82,21 +82,48 @@ def render_code_window(rows, pitch_type):
     for category, items in grouped.items():
         st.markdown(f"<h4 style='margin-top:2rem;background:#eee;padding:6px;border-radius:4px;'>{category}</h4>", unsafe_allow_html=True)
 
-        grid_html = "<div style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;"
-        grid_html += "background-image:url(\"https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg\");"
-        grid_html += "background-size:cover;border:2px solid #aaa;margin-bottom:20px;display:grid;"
-        grid_html += "grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:12px;'>"
+        grid_html = '''<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+  const tagPositions = {};
+  function reportPosition(id, left, top) {
+    tagPositions[id] = { left, top };
+    console.log("Saved position:", tagPositions);
+  }
+  $(function() {
+    $(".draggable-tag").draggable({ 
+      containment: "#pitch-container",
+      grid: [20, 20],
+      stop: function(event, ui) {
+        const id = ui.helper.attr("id");
+        const left = ui.position.left;
+        const top = ui.position.top;
+        reportPosition(id, left, top);
+      }
+    });
+  });
+</script>
+<style>
+  .draggable-tag {
+    position: absolute;
+    cursor: move;
+    padding: 10px;
+    border-radius: 6px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-family: sans-serif;
+  }
+</style>
+<div id='pitch-container' style='position:relative;width:100%;max-width:800px;aspect-ratio:2/1;
+background-image:url("https://upload.wikimedia.org/wikipedia/commons/1/1c/Soccer_field_clear_-_empty.svg");
+background-size:cover;border:2px solid #aaa;margin-bottom:20px;'>'''
 
-        placed = []
-        for row in items:
+        for idx, row in enumerate(items):
             name = row.get("name", "Unnamed")
             colour = get_colour_for_row(name)
-            x_shift, y_shift = 0, 0
-            while (x_shift, y_shift) in placed:
-                y_shift += 1
-            placed.append((x_shift, y_shift))
-            block_html = f"<div style='background-color:{colour};padding:12px;border-radius:6px;color:white;"
-            block_html += "text-align:center;font-weight:bold;font-family:sans-serif;'>"
+            x = 5 + (idx % 4) * 22
+            y = 10 + (idx // 4) * 25
+            block_html = f"<div class='draggable-tag' id='tag-{idx}' title='Drag to reposition' style='left:{x}%;top:{y}%;background-color:{colour};'>"
             block_html += f"{name}</div>"
             grid_html += block_html
 
